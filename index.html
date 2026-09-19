@@ -173,9 +173,10 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    perspective: 1800px;
-    perspective-origin: 50% 40%;
+    perspective: 1650px;
+    perspective-origin: 50% 44%;
     user-select:none;
+    touch-action: pan-y;
     min-height:0;
   }
 
@@ -194,16 +195,18 @@
     height: 340px;
     margin: -170px 0 0 -170px;
     transform-style: preserve-3d;
-    transition: transform .38s cubic-bezier(.2,.9,.32,1.18), opacity .32s ease;
+    transform-origin:center 60%;
+    transition: transform .56s cubic-bezier(.2,.82,.24,1), opacity .4s ease;
     cursor: pointer;
     will-change: transform;
   }
+  .stage-wrap.is-browsing .cover{ transition:none; }
   .cover-face{
     width:100%;
     height:100%;
     border-radius: 0;
     overflow: hidden;
-    box-shadow: 0 34px 70px -20px rgba(30,30,45,0.45);
+    box-shadow: 0 30px 64px -22px rgba(30,30,45,0.44);
     position: relative;
     background: linear-gradient(160deg, #d8d8dd, #c3c3c9);
     -webkit-box-reflect: below 2px linear-gradient(transparent, transparent 55%, rgba(255,255,255,0.35));
@@ -211,7 +214,16 @@
     transition: transform .18s cubic-bezier(.22,.61,.36,1);
   }
   .cover:active .cover-face{ transform: scale(0.965); }
-  .cover-face img{ width:100%; height:100%; object-fit: cover; display:block; }
+  .cover,
+  .cover-face,
+  .cover-face img{
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+  .cover-face img{
+    width:100%; height:100%; object-fit: cover; display:block;
+    pointer-events:none;
+  }
   .cover-face .no-art{
     width:100%; height:100%;
     display:flex; align-items:center; justify-content:center;
@@ -226,7 +238,7 @@
     pointer-events:none;
   }
   .cover.is-center .cover-face{
-    box-shadow: 0 44px 80px -18px rgba(30,30,45,0.5);
+    box-shadow: 0 46px 88px -20px rgba(30,30,45,0.52);
   }
   .cover.is-playing .cover-face{
     box-shadow: 0 44px 80px -18px rgba(30,30,45,0.5), 0 0 60px -6px rgba(120,140,255,0.4);
@@ -283,9 +295,11 @@
     pointer-events:none;
     opacity: 0;
     transition: opacity .22s ease;
-    background: rgba(20,20,24,0.22);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    /* Preserve the album's ambient palette instead of covering it with a
+       neutral dark veil. */
+    background: rgba(20,22,22,0.12);
+    backdrop-filter: blur(9px) saturate(1.04) brightness(0.94);
+    -webkit-backdrop-filter: blur(9px) saturate(1.04) brightness(0.94);
   }
   .drag-hint.active{ opacity: 1; }
   .drag-hint-card{
@@ -298,6 +312,19 @@
     transform: scale(0.94);
     transition: transform .22s cubic-bezier(.2,.9,.32,1.18);
   }
+  /* This is a contextual glass surface: it borrows the live album colour
+     beneath it rather than using the brighter, neutral app-panel fill. */
+  .drag-hint-card.glass{
+    background: linear-gradient(145deg, rgba(255,255,255,0.24), rgba(255,255,255,0.07));
+    border: 1px solid rgba(255,255,255,0.38);
+    backdrop-filter: blur(26px) saturate(1.18) contrast(1.02);
+    -webkit-backdrop-filter: blur(26px) saturate(1.18) contrast(1.02);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.58),
+      inset 0 -14px 22px -18px rgba(255,255,255,0.38),
+      0 20px 48px -28px rgba(15,18,20,0.48);
+  }
+  .drag-hint-card.glass::before{ opacity:0.56; }
   .drag-hint.active .drag-hint-card{ transform: scale(1); }
   .drag-hint-icon{
     width: 52px; height:52px;
@@ -332,18 +359,23 @@
     padding: 10px 12px 10px 14px;
     border-radius: 999px;
     width: 100%;
-    max-width: 480px;
-    transition: border-radius .5s cubic-bezier(.16,1,.3,1), padding .5s cubic-bezier(.16,1,.3,1);
+    max-width: 540px;
+    transition:
+      border-radius .32s cubic-bezier(.16,1,.3,1),
+      padding .32s cubic-bezier(.16,1,.3,1);
   }
   .mini-transport-inner:hover,
   .mini-transport-inner.pinned{
     border-radius: 26px;
     padding: 12px 16px 13px;
+    transition:
+      border-radius .1s cubic-bezier(.16,1,.3,1),
+      padding .1s cubic-bezier(.16,1,.3,1);
   }
   .bar-top{
     display:flex;
     align-items:center;
-    gap: 12px;
+    gap: 18px;
   }
   .bar-track{
     display:flex;
@@ -358,7 +390,14 @@
     background:#dcdce0;
     display:flex; align-items:center; justify-content:center;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    border:0;
+    padding:0;
+    appearance:none;
+    cursor:pointer;
+    transition: transform .16s ease, box-shadow .16s ease;
   }
+  .bar-thumb:hover{ transform:scale(1.045); box-shadow:0 5px 12px -4px rgba(0,0,0,0.32); }
+  .bar-thumb:active{ transform:scale(.95); }
   .bar-thumb img{ width:100%; height:100%; object-fit:cover; }
   .bar-thumb svg{ width:15px; height:15px; color: var(--text-dimmer); }
   .bar-text{ min-width:0; flex:1; }
@@ -386,7 +425,7 @@
     border:none;
     color: rgba(28,28,30,0.6);
     cursor:pointer;
-    width: 36px; height:36px;
+    width: 38px; height:38px;
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
@@ -394,7 +433,7 @@
   }
   .vol-btn:hover{ color: var(--text); background: rgba(255,255,255,0.4); }
   .vol-btn:active{ transform: scale(0.9); }
-  .vol-btn svg{ width:19px; height:19px; }
+  .vol-btn svg{ width:22px; height:22px; }
   .vol-seek{
     -webkit-appearance:none; appearance:none;
     width: 0;
@@ -427,10 +466,13 @@
   .bar-controls{
     display:flex;
     align-items:center;
-    gap: 4px;
+    gap: 6px;
     flex-shrink:0;
     position: relative; z-index:1;
   }
+  /* Bar-top uses 18px gaps; tighten only volume → shuffle to the same 6px
+     rhythm used between shuffle and previous. */
+  .bar-volume + .bar-controls{ margin-left: -12px; }
   .mtbtn{
     background:none;
     border:none;
@@ -446,7 +488,7 @@
   }
   .mtbtn:hover{ color: var(--text); background: rgba(255,255,255,0.4); }
   .mtbtn:active{ transform: scale(0.9); }
-  .mtbtn svg{ width:17px; height:17px; }
+  .mtbtn svg{ width:22px; height:22px; }
   .mtbtn.play{
     width: 46px; height:46px;
     background: linear-gradient(165deg, #333335, #0a0a0c);
@@ -461,6 +503,35 @@
   .mtbtn.play:active{ transform: scale(0.94); }
   .mtbtn.play svg{ width:19px; height:19px; }
 
+  .mtbtn.mode{ width: 38px; height: 38px; }
+  /* Line-based repeat/shuffle glyphs fill more of their viewBox than the
+     filled transport glyphs, so a small optical reduction aligns them. */
+  .mtbtn.mode svg{ width:14px; height:14px; }
+  .mtbtn.mode.on{
+    color: #0a0a0c;
+    background: rgba(0,0,0,0.08);
+  }
+  .mtbtn.mode.on:hover{ background: rgba(0,0,0,0.12); }
+  .repeat-one-badge{
+    position:absolute;
+    bottom: 0px; right: 0px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #0a0a0c;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 800;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity .15s ease, transform .15s ease;
+    pointer-events:none;
+  }
+  .mtbtn.mode.show-one .repeat-one-badge{ opacity: 1; transform: scale(1); }
+
   /* ---------- Progress / seek row (hidden until hover) ---------- */
   .bar-progress{
     display:flex;
@@ -473,7 +544,10 @@
     margin-top: 0;
     overflow: hidden;
     pointer-events: none;
-    transition: max-height .5s cubic-bezier(.16,1,.3,1), opacity .4s ease .04s, margin-top .5s cubic-bezier(.16,1,.3,1);
+    transition:
+      max-height .32s cubic-bezier(.16,1,.3,1),
+      opacity .3s ease,
+      margin-top .32s cubic-bezier(.16,1,.3,1);
   }
   .mini-transport-inner:hover .bar-progress,
   .mini-transport-inner.pinned .bar-progress{
@@ -481,7 +555,10 @@
     opacity: 1;
     margin-top: 8px;
     pointer-events: auto;
-    transition: max-height .5s cubic-bezier(.16,1,.3,1), opacity .45s ease .08s, margin-top .5s cubic-bezier(.16,1,.3,1);
+    transition:
+      max-height .32s cubic-bezier(.16,1,.3,1),
+      opacity .3s ease,
+      margin-top .32s cubic-bezier(.16,1,.3,1);
   }
   .bar-time{
     font-size: 10px;
@@ -495,9 +572,10 @@
     -webkit-appearance:none;
     appearance:none;
     flex: 1;
-    height: 3px;
+    /* Keep a thin visible rail while leaving room for the thumb halo. */
+    height: 20px;
     border-radius: 2px;
-    background: rgba(28,28,30,0.15);
+    background: transparent;
     cursor:pointer;
     outline:none;
   }
@@ -558,32 +636,132 @@
     display:flex; align-items:center; justify-content:center;
   }
   .drawer-close svg{ width:14px; height:14px; }
+
+  .drawer-search{
+    padding: 10px 16px 4px;
+    position: relative; z-index:1;
+  }
+  .drawer-search-inner{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 12px;
+    padding: 8px 11px;
+  }
+  .drawer-search-inner svg{ width:13px; height:13px; color: var(--text-dimmer); flex-shrink:0; }
+  .drawer-search-inner input{
+    border:none;
+    background:none;
+    outline:none;
+    font-family: var(--font);
+    font-size: 12.5px;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+  }
+  .drawer-search-inner input::placeholder{ color: var(--text-dimmer); }
+  .drawer-search-clear{
+    background:none; border:none; cursor:pointer;
+    color: var(--text-dimmer);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    opacity: 0;
+    pointer-events:none;
+    transition: opacity .15s ease, color .15s ease;
+  }
+  .drawer-search-clear.show{ opacity:1; pointer-events:auto; }
+  .drawer-search-clear:hover{ color: var(--text); }
+  .drawer-search-clear svg{ width:13px; height:13px; }
+
   .track-list{
     overflow-y: auto;
     flex:1;
     padding: 8px 0;
     position: relative; z-index:1;
+    scrollbar-gutter:stable;
+    scrollbar-width:auto;
+    scrollbar-color:transparent transparent;
   }
+  .track-list::-webkit-scrollbar{ width:16px; }
+  .track-list::-webkit-scrollbar-track{ background:transparent; }
+  .track-list::-webkit-scrollbar-thumb{
+    background:transparent;
+    border:3px solid transparent;
+    border-radius:999px;
+    background-clip:padding-box;
+    transition:background-color .55s ease;
+  }
+  .track-list.is-scrolling{ scrollbar-color:rgba(28,28,30,0.28) transparent; }
+  .track-list.is-scrolling::-webkit-scrollbar-thumb{ background-color:rgba(28,28,30,0.28); }
   .track-item{
     display:flex;
     align-items:center;
-    gap: 12px;
-    padding: 9px 18px;
-    margin: 2px 8px;
+    gap: 10px;
+    padding: 8px 10px 8px 6px;
+    margin: 2px 0 2px 16px;
     border-radius: 14px;
     cursor:pointer;
+    -webkit-user-select:none;
+    user-select:none;
+    transition: transform .24s cubic-bezier(.2,.8,.2,1), background .12s ease, opacity .15s ease, box-shadow .12s ease;
+  }
+  .track-item *{
+    -webkit-user-select:none;
+    user-select:none;
   }
   .track-item:hover{ background: rgba(255,255,255,0.4); }
   .track-item.active{ background: rgba(255,255,255,0.6); }
+  .track-list.is-dragging .track-item,
+  .track-list.is-dragging .track-item:hover,
+  .track-list.is-dragging .track-item.active,
+  .track-list.is-dragging .track-item.dragging{ background:transparent; }
+  .track-item.dragging{ opacity: 0.38; background: rgba(255,255,255,0.64); }
+  .track-item.dissolving{
+    opacity:.04;
+    pointer-events:none;
+    transform:scale(.98);
+    transition:opacity .46s cubic-bezier(.22,.61,.36,1), transform .46s cubic-bezier(.22,.61,.36,1);
+  }
   .track-thumb{
     width: 36px; height:36px; border-radius:10px;
     background: #dcdce0;
     flex-shrink:0;
-    overflow:hidden;
+    overflow:hidden; position:relative; isolation:isolate;
     display:flex; align-items:center; justify-content:center;
   }
-  .track-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .track-thumb img{
+    position:absolute; inset:0; z-index:0;
+    width:100%; height:100%; display:block;
+    object-fit:cover; object-position:center 52%;
+    transform:scale(1);
+    -webkit-user-drag:none;
+    user-select:none;
+    pointer-events:none;
+  }
   .track-thumb svg{ width:14px; height:14px; color: var(--text-dimmer); }
+  .track-current-control{
+    position:absolute; inset:0; z-index:1;
+    width:100%; height:100%; box-sizing:border-box;
+    border-radius:inherit;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent;
+    opacity:0;
+    transform:scale(.98);
+    transition:opacity .13s ease-out, transform .13s ease-out;
+    pointer-events:none;
+  }
+  .track-item.active:hover .track-current-control{ opacity:1; transform:scale(1); }
+  .track-item.active:active .track-current-control{ transform:scale(.92); transition-duration:.07s; }
+  .track-current-control svg{
+    position:absolute;
+    width:17px; height:17px; fill:#fff;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.32));
+    opacity:0; transform:scale(.7);
+    transition:opacity .1s ease-out, transform .1s ease-out;
+  }
+  .track-item.playing .track-current-pause,
+  .track-item:not(.playing) .track-current-play{ opacity:1; transform:scale(1); }
   .track-info{ min-width:0; flex:1; }
   .track-info .t-title{
     font-family: var(--font);
@@ -599,8 +777,34 @@
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     margin-top:1px;
   }
-  .track-num{
-    font-size:10px; color: var(--text-dimmer); width:16px; text-align:right; flex-shrink:0;
+  .track-delete{
+    width: 26px; height:26px;
+    border-radius: 50%;
+    flex-shrink:0;
+    background:none;
+    border:none;
+    color: rgba(28,28,30,0.4);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transform:scale(.72);
+    transition: opacity .18s ease, transform .18s ease, color .15s ease, background .15s ease;
+  }
+  .track-item:hover .track-delete,
+  .track-item:focus-within .track-delete{ opacity:0.7; pointer-events:auto; transform:scale(1); }
+  .track-delete:hover{ opacity:1; color:#c0392b; background: rgba(192,57,43,0.1); }
+  .track-delete svg{ width:12px; height:12px; }
+  .dissolve-canvas{
+    position:fixed;
+    inset:0;
+    z-index:80;
+    pointer-events:none;
+  }
+  .track-empty-msg{
+    padding: 30px 20px;
+    text-align:center;
+    font-size: 12px;
+    color: var(--text-dimmer);
   }
 
   .drawer-backdrop{
@@ -613,6 +817,142 @@
   }
   .drawer-backdrop.open{ opacity:1; pointer-events:auto; }
 
+  /* ---------- Escape rain-glass lock ---------- */
+  .rain-lock{
+    position:fixed;
+    inset:0;
+    z-index:300;
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout:none;
+    background:linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.035));
+    backdrop-filter:blur(48px) saturate(1.15) brightness(.9) contrast(1.04);
+    -webkit-backdrop-filter:blur(48px) saturate(1.15) brightness(.9) contrast(1.04);
+    transition: opacity .42s ease, visibility 0s linear .42s;
+  }
+  .rain-lock.active{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    touch-action:none;
+    transition: opacity .42s ease;
+  }
+  .rain-lock::before,
+  .rain-lock::after,
+  .rain-drops{ display:none; }
+  .rain-lock::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(54% 22% at 22% 20%, rgba(255,255,255,.62), transparent 72%),
+      radial-gradient(48% 20% at 78% 31%, rgba(255,255,255,.48), transparent 70%),
+      linear-gradient(112deg, transparent 34%, rgba(255,255,255,.4) 49%, transparent 64%),
+      linear-gradient(180deg, rgba(255,255,255,.3), transparent 42%, rgba(95,118,128,.07));
+    pointer-events:none;
+  }
+  .rain-lock::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.55;
+    background:
+      linear-gradient(102deg, transparent 30%, rgba(255,255,255,.3) 46%, transparent 58%),
+      linear-gradient(280deg, transparent 42%, rgba(77,109,124,.12) 76%, transparent);
+  }
+  .rain-drops{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .rain-drop{
+    position:absolute;
+    top:-10vh;
+    left:var(--x);
+    width:var(--size);
+    height:var(--height);
+    border-radius:52% 48% 53% 47% / 45% 46% 54% 55%;
+    opacity:0;
+    background:
+      radial-gradient(circle at 32% 24%, rgba(255,255,255,.98) 0 10%, rgba(255,255,255,.46) 21%, transparent 39%),
+      radial-gradient(circle at 60% 70%, rgba(158,181,190,.38), rgba(197,215,220,.21) 46%, rgba(255,255,255,.06) 72%);
+    border:1px solid rgba(255,255,255,.58);
+    box-shadow:inset 1px 1px 1px rgba(255,255,255,.7), inset -1px -1px 2px rgba(76,111,124,.12), 1px 2px 5px rgba(75,104,115,.18);
+    transform:translate3d(0, -12vh, 0) rotate(var(--tilt));
+    animation: water-drop-roll var(--duration) cubic-bezier(.25,.46,.45,.94) var(--delay) infinite;
+    will-change:transform;
+  }
+  .rain-drop.heavy{
+    box-shadow:inset 1px 1px 2px rgba(255,255,255,.82), inset -1px -1px 3px rgba(67,104,120,.16), 2px 3px 8px rgba(65,96,108,.22);
+  }
+  @keyframes water-drop-roll{
+    0%{ opacity:0; transform:translate3d(0,-12vh,0) scale(.74) rotate(var(--tilt)); }
+    9%{ opacity:var(--alpha); }
+    62%{ opacity:var(--alpha); }
+    100%{ opacity:0; transform:translate3d(var(--drift),122vh,0) scale(.84) rotate(var(--tilt)); }
+  }
+  .lock-feedback{
+    position:fixed;
+    inset:0;
+    z-index:310;
+    display:grid;
+    place-items:center;
+    pointer-events:none;
+    visibility:hidden;
+  }
+  .lock-feedback.show{
+    visibility:visible;
+  }
+  .lock-feedback::before{
+    content:'';
+    grid-area:1 / 1;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    opacity:0;
+    transform:scale(.72);
+    background:linear-gradient(165deg, var(--glass-fill-top), var(--glass-fill-bottom));
+    border:none;
+    box-shadow:
+      inset 0 1px 0 var(--glass-rim),
+      inset 0 0 0 1px rgba(255,255,255,.12),
+      inset 0 -12px 20px -14px rgba(255,255,255,.5),
+      inset 0 14px 24px -18px rgba(0,0,0,.12),
+      0 12px 26px -12px var(--glass-shadow);
+    backdrop-filter:blur(38px) saturate(2.2) contrast(1.05);
+    -webkit-backdrop-filter:blur(38px) saturate(2.2) contrast(1.05);
+  }
+  .lock-feedback.show::before{ animation:lock-feedback-lens 1.05s cubic-bezier(.16,1,.3,1) both; }
+  .lock-feedback svg{
+    grid-area:1 / 1;
+    width:34px;
+    height:34px;
+    opacity:0;
+    transform:translateY(4px) scale(.82);
+    color:#111;
+    filter:drop-shadow(0 1px 1px rgba(255,255,255,.78));
+  }
+  .lock-feedback.show svg{ animation:lock-feedback-glyph 1.05s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes lock-feedback-lens{
+    0%{ opacity:0; transform:scale(.72); }
+    18%, 67%{ opacity:1; transform:scale(1); }
+    100%{ opacity:0; transform:scale(.92); }
+  }
+  @keyframes lock-feedback-glyph{
+    0%, 8%{ opacity:0; transform:translateY(5px) scale(.74); }
+    24%, 66%{ opacity:1; transform:translateY(0) scale(1); }
+    100%{ opacity:0; transform:translateY(-2px) scale(.92); }
+  }
+  html.page-locked,
+  body.page-locked{
+    overscroll-behavior:none;
+    overscroll-behavior-x:none;
+  }
+  @media (prefers-reduced-motion: reduce){ .rain-drop{ animation:none; } }
+
   ::-webkit-scrollbar{ width: 7px; }
   ::-webkit-scrollbar-thumb{ background: rgba(28,28,30,0.18); border-radius:4px; }
   ::-webkit-scrollbar-track{ background:transparent; }
@@ -621,6 +961,7 @@
     .cover{ width:250px; height:250px; margin:-125px 0 0 -125px; }
     .drawer{ width: calc(100% - 24px); }
     .brand .sub{ display:none; }
+    .bar-volume{ display:none; }
   }
 </style>
 </head>
@@ -674,15 +1015,6 @@
         Add music
       </button>
     </div>
-    <div class="drag-hint" id="drag-hint">
-      <div class="drag-hint-card glass">
-        <div class="drag-hint-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
-        </div>
-        <div class="drag-hint-text">Drop</div>
-        <div class="drag-hint-sub">Audio files only</div>
-      </div>
-    </div>
   </div>
 
   <div class="now-info" id="now-info" style="visibility:hidden;">
@@ -694,7 +1026,7 @@
     <div class="mini-transport-inner glass" id="mini-bar">
       <div class="bar-top">
         <div class="bar-track">
-          <div class="bar-thumb" id="bar-thumb"></div>
+          <button class="bar-thumb" id="bar-thumb" type="button" title="Show playing album" aria-label="Show playing album"></button>
           <div class="bar-text">
             <div class="bar-title" id="bar-title">Good time, the office worker</div>
             <div class="bar-sub" id="bar-sub">Add music to get started</div>
@@ -707,6 +1039,15 @@
           <input type="range" class="vol-seek" id="volume" min="0" max="1" step="0.01" value="0.85">
         </div>
         <div class="bar-controls">
+          <button class="mtbtn mode" id="play-mode-btn" title="Repeat all">
+            <svg id="play-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            <span class="repeat-one-badge" id="repeat-one-badge">1</span>
+          </button>
           <button class="mtbtn" id="prev-btn" title="Previous">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l10-6v12z"/></svg>
           </button>
@@ -727,6 +1068,22 @@
   </div>
 </div>
 
+<!-- Kept outside the perspective stage so its fixed backdrop covers the whole viewport. -->
+<div class="drag-hint" id="drag-hint">
+  <div class="drag-hint-card glass">
+    <div class="drag-hint-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>
+    </div>
+    <div class="drag-hint-text">Drop</div>
+    <div class="drag-hint-sub">Audio files only</div>
+  </div>
+</div>
+
+<div class="rain-lock" id="rain-lock" aria-hidden="true">
+  <div class="rain-drops" id="rain-drops"></div>
+</div>
+<div class="lock-feedback" id="lock-feedback" aria-live="polite" aria-atomic="true"></div>
+
 <div class="drawer-backdrop" id="drawer-backdrop"></div>
 <div class="drawer glass" id="drawer">
   <div class="drawer-header">
@@ -734,6 +1091,15 @@
     <div style="display:flex; align-items:center; gap:10px;">
       <span class="count" id="track-count">0 songs</span>
       <button class="drawer-close" id="drawer-close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drawer-search">
+    <div class="drawer-search-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="track-search" placeholder="Search songs or artists">
+      <button class="drawer-search-clear" id="track-search-clear" title="Clear search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -755,6 +1121,9 @@
   const addBtn = document.getElementById('add-btn');
   const emptyAddBtn = document.getElementById('empty-add-btn');
   const dragHint = document.getElementById('drag-hint');
+  const rainLock = document.getElementById('rain-lock');
+  const rainDrops = document.getElementById('rain-drops');
+  const lockFeedback = document.getElementById('lock-feedback');
 
   const listToggle = document.getElementById('list-toggle');
   const drawer = document.getElementById('drawer');
@@ -762,6 +1131,8 @@
   const drawerClose = document.getElementById('drawer-close');
   const trackList = document.getElementById('track-list');
   const trackCount = document.getElementById('track-count');
+  const trackSearch = document.getElementById('track-search');
+  const trackSearchClear = document.getElementById('track-search-clear');
 
   const playBtn = document.getElementById('play-btn');
   const playIcon = document.getElementById('play-icon');
@@ -776,10 +1147,13 @@
   const volume = document.getElementById('volume');
   const muteBtn = document.getElementById('mute-btn');
   const volIcon = document.getElementById('vol-icon');
+  const playModeBtn = document.getElementById('play-mode-btn');
+  const playModeIcon = document.getElementById('play-mode-icon');
 
   const ambientA = document.getElementById('ambient-a');
   const ambientB = document.getElementById('ambient-b');
   let ambientTop = 'a';
+  let ambientTrackKey = null;
 
   const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
   const ICON_PAUSE = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
@@ -791,69 +1165,122 @@
   }
 
   let tracks = [];
+  let trackUid = 0;
   let centerIndex = 0;
+  let playingIndex = 0;
   let isPlaying = false;
+  let shuffleOn = false;
+  let repeatMode = 'off'; // 'off' | 'all' | 'one'; shuffle uses repeatMode 'off'
+  let playHistory = [];
+  let searchQuery = '';
+  let dragSrcIndex = null;
+  let dragTrack = null;
+  let dragItem = null;
+  let dragHasMoved = false;
+  let deletePending = false;
+  let pageLocked = false;
+  let lockFeedbackTimer = null;
+
+  function updateModeButtons(){
+    const mode = shuffleOn ? 'shuffle' : repeatMode;
+    const icons = {
+      off: '<polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path>',
+      all: '<polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path>',
+      one: '<polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path>',
+      shuffle: '<polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line>'
+    };
+    playModeIcon.innerHTML = icons[mode] || icons.all;
+    playModeBtn.classList.toggle('on', mode !== 'off');
+    playModeBtn.classList.toggle('show-one', mode === 'one');
+    playModeBtn.title = mode === 'one' ? 'Repeat one' : (mode === 'shuffle' ? 'Shuffle' : (mode === 'all' ? 'Repeat all' : 'Play through once'));
+  }
 
   const audio = new Audio();
   audio.volume = parseFloat(volume.value);
 
-  // ---- Synthesized mechanical "card" sound for switching albums ----
-  let actx = null;
-  function getActx(){
-    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    if(actx.state === 'suspended') actx.resume();
-    return actx;
+  function buildRainLock(){
+    const fragment = document.createDocumentFragment();
+    for(let i = 0; i < 54; i += 1){
+      const drop = document.createElement('span');
+      const isHeavy = i % 11 === 0;
+      drop.className = 'rain-drop' + (isHeavy ? ' heavy' : '');
+      const size = isHeavy ? 5 + Math.random() * 4 : 1.6 + Math.random() * 3.9;
+      drop.style.setProperty('--x', `${Math.random() * 104 - 2}%`);
+      drop.style.setProperty('--size', `${size}px`);
+      drop.style.setProperty('--height', `${size * (1.04 + Math.random() * 0.22)}px`);
+      drop.style.setProperty('--alpha', `${0.22 + Math.random() * 0.32}`);
+      drop.style.setProperty('--duration', `${3.8 + Math.random() * 5.6}s`);
+      drop.style.setProperty('--delay', `${-Math.random() * 9.2}s`);
+      drop.style.setProperty('--drift', `${-28 + Math.random() * 56}px`);
+      drop.style.setProperty('--tilt', `${-14 + Math.random() * 28}deg`);
+      fragment.appendChild(drop);
+    }
+    rainDrops.appendChild(fragment);
   }
+
+  function showLockFeedback(locked){
+    const icon = locked
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.6" y="10" width="12.8" height="9.5" rx="2.35"/><path d="M8.2 10V7.65a3.8 3.8 0 0 1 7.6 0V10"/><path d="M12 14v2"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.6" y="10" width="12.8" height="9.5" rx="2.35"/><path d="M8.2 10V8a3.8 3.8 0 0 1 6.3-2.85"/><path d="M12 14v2"/></svg>';
+    clearTimeout(lockFeedbackTimer);
+    lockFeedback.innerHTML = icon;
+    lockFeedback.setAttribute('aria-label', locked ? 'Page locked' : 'Page unlocked');
+    lockFeedback.classList.remove('show');
+    void lockFeedback.offsetWidth;
+    lockFeedback.classList.add('show');
+    lockFeedbackTimer = window.setTimeout(() => lockFeedback.classList.remove('show'), 1080);
+  }
+
+  function togglePageLock(){
+    pageLocked = !pageLocked;
+    rainLock.classList.toggle('active', pageLocked);
+    rainLock.setAttribute('aria-hidden', String(!pageLocked));
+    document.documentElement.classList.toggle('page-locked', pageLocked);
+    document.body.classList.toggle('page-locked', pageLocked);
+    if(pageLocked){
+      freezeCoverMotion();
+      if(document.activeElement instanceof HTMLElement){
+        document.activeElement.blur();
+      }
+      window.getSelection()?.removeAllRanges();
+    } else {
+      // Absorb the final wheel packets emitted by a trackpad after unlock.
+      coverInputBlockedUntil = performance.now() + 720;
+    }
+    showLockFeedback(pageLocked);
+  }
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+    rainLock.addEventListener(eventName, (event) => {
+      if(!pageLocked) return;
+      event.preventDefault();
+      event.stopPropagation();
+    });
+  });
+
+  function blockLockedGesture(event){
+    if(!pageLocked) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  window.addEventListener('wheel', blockLockedGesture, { capture:true, passive:false });
+  window.addEventListener('touchmove', blockLockedGesture, { capture:true, passive:false });
+  window.addEventListener('gesturestart', blockLockedGesture, { capture:true, passive:false });
+  window.addEventListener('gesturechange', blockLockedGesture, { capture:true, passive:false });
+
+  // ---- One clean card tick taken from the user-provided video reference ----
+  const coverTickPool = Array.from({length:4}, () => {
+    const tick = new Audio('sound-previews/13-video-card-tick.wav');
+    tick.preload = 'auto';
+    tick.volume = 1;
+    return tick;
+  });
+  let coverTickCursor = 0;
   function playCardSound(){
     try{
-      const ctx = getActx();
-      const now = ctx.currentTime;
-
-      const snap = ctx.createOscillator();
-      snap.type = 'square';
-      snap.frequency.setValueAtTime(3200, now);
-      snap.frequency.exponentialRampToValueAtTime(1800, now + 0.012);
-      const snapGain = ctx.createGain();
-      snapGain.gain.setValueAtTime(0.22, now);
-      snapGain.gain.exponentialRampToValueAtTime(0.0006, now + 0.028);
-      const snapFilter = ctx.createBiquadFilter();
-      snapFilter.type = 'highpass';
-      snapFilter.frequency.value = 1200;
-      snap.connect(snapFilter).connect(snapGain).connect(ctx.destination);
-      snap.start(now);
-      snap.stop(now + 0.03);
-
-      const thunkTime = now + 0.014;
-      const thunk = ctx.createOscillator();
-      thunk.type = 'triangle';
-      thunk.frequency.setValueAtTime(180, thunkTime);
-      thunk.frequency.exponentialRampToValueAtTime(90, thunkTime + 0.05);
-      const thunkGain = ctx.createGain();
-      thunkGain.gain.setValueAtTime(0.001, thunkTime);
-      thunkGain.gain.linearRampToValueAtTime(0.28, thunkTime + 0.004);
-      thunkGain.gain.exponentialRampToValueAtTime(0.001, thunkTime + 0.07);
-      thunk.connect(thunkGain).connect(ctx.destination);
-      thunk.start(thunkTime);
-      thunk.stop(thunkTime + 0.08);
-
-      const dur = 0.02;
-      const bufferSize = Math.floor(ctx.sampleRate * dur);
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for(let i = 0; i < bufferSize; i++){
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2.2);
-      }
-      const noise = ctx.createBufferSource();
-      noise.buffer = buffer;
-      const noiseFilter = ctx.createBiquadFilter();
-      noiseFilter.type = 'highpass';
-      noiseFilter.frequency.value = 3000;
-      const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.12, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.0005, now + dur);
-      noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
-      noise.start(now);
-      noise.stop(now + dur);
+      const tick = coverTickPool[coverTickCursor++ % coverTickPool.length];
+      tick.currentTime = 0;
+      tick.play().catch(() => {});
     }catch(e){}
   }
 
@@ -874,6 +1301,21 @@
     incoming.classList.add('active');
     outgoing.classList.remove('active');
     ambientTop = ambientTop === 'a' ? 'b' : 'a';
+  }
+
+  // The visual browsing focus owns the environment colour; audio playback
+  // remains independent until the user explicitly commits the selected cover.
+  function getBrowseFocusIndex(){
+    if(!tracks.length) return -1;
+    return Math.max(0, Math.min(tracks.length - 1, Math.round(centerIndex - coverBrowseProgress)));
+  }
+
+  function updateBrowseAmbient(){
+    const track = tracks[getBrowseFocusIndex()];
+    const key = track ? String(track.id) + ':' + (track.art || '') : '';
+    if(key === ambientTrackKey) return;
+    ambientTrackKey = key;
+    setAmbient(track?.art || '');
   }
 
   function guessFromFilename(name){
@@ -911,6 +1353,45 @@
     });
   }
 
+  let queuedCoverRefresh;
+  function refreshRenderedTrack(track){
+    const trackItem = Array.from(trackList.querySelectorAll('.track-item'))
+      .find((item) => item.dataset.trackId === String(track.id));
+    if(!trackItem) return;
+    trackItem.querySelector('.t-title').textContent = track.title || 'Untitled';
+    trackItem.querySelector('.t-artist').textContent = track.artist || 'Unknown artist';
+    if(track.art){
+      const thumb = trackItem.querySelector('.track-thumb');
+      let image = thumb.querySelector('img');
+      if(!image){
+        image = document.createElement('img');
+        image.draggable = false;
+        thumb.querySelector('svg')?.remove();
+        thumb.prepend(image);
+      }
+      image.src = track.art;
+    }
+  }
+
+  function queueCoverRefresh(){
+    clearTimeout(queuedCoverRefresh);
+    queuedCoverRefresh = window.setTimeout(() => {
+      queuedCoverRefresh = null;
+      renderCovers();
+    }, 90);
+  }
+
+  // Keep Cover Flow on the same ordering source as the list while a row is
+  // being rearranged, without rendering more than once per visual frame.
+  let queuedOrderSyncFrame = null;
+  function queueCoverOrderSync(){
+    if(queuedOrderSyncFrame) return;
+    queuedOrderSyncFrame = requestAnimationFrame(() => {
+      queuedOrderSyncFrame = null;
+      renderCovers();
+    });
+  }
+
   async function addFiles(fileList){
     const files = Array.from(fileList).filter(f => f.type.startsWith('audio/') || /\.(mp3|m4a|wav|flac|ogg|aac)$/i.test(f.name));
     if(files.length === 0) return;
@@ -923,6 +1404,7 @@
       const url = URL.createObjectURL(file);
       const fallback = guessFromFilename(file.name);
       const track = {
+        id: ++trackUid,
         url,
         file,
         title: fallback.title,
@@ -933,108 +1415,138 @@
       };
       tracks.push(track);
       const idx = tracks.length - 1;
-      renderCovers();
-      renderTrackList();
 
       readTags(file).then(tags => {
         if(tags.title) track.title = tags.title;
         if(tags.artist) track.artist = tags.artist;
         if(tags.album) track.album = tags.album;
         if(tags.art) track.art = tags.art;
-        renderCovers();
-        renderTrackList();
-        if(idx === centerIndex){
+        refreshRenderedTrack(track);
+        queueCoverRefresh();
+        if(idx === playingIndex){
           updateNowInfo();
-          if(tags.art) setAmbient(tags.art);
         }
+        if(idx === getBrowseFocusIndex()) updateBrowseAmbient();
       });
     }
 
     if(wasEmpty){
       centerIndex = 0;
-      renderCovers();
+      playingIndex = 0;
+    }
+    renderCovers();
+    renderTrackList();
+
+    if(wasEmpty){
       updateNowInfo();
       loadCurrent(false);
-    } else {
-      renderCovers();
     }
   }
 
   function coverFaceHTML(track){
     if(track.art){
-      return '<img src="' + track.art + '" alt="">';
+      return '<img src="' + track.art + '" alt="" draggable="false">';
     }
     return '<div class="no-art">' + NOTE_SVG + '</div>';
   }
 
-  function renderCovers(){
-    stage.innerHTML = '';
+  function renderCovers(browseProgress = 0){
     const total = tracks.length;
-    if(total === 0){ floorGlow.style.opacity = 0; return; }
+    if(total === 0){
+      stage.innerHTML = '';
+      floorGlow.style.opacity = 0;
+      return;
+    }
     floorGlow.style.opacity = 0.8;
 
-    const RANGE = 7;
+    const RANGE = 8;
+    const visibleTrackIds = new Set();
+    // During a rolling animation, reuse the current cover nodes instead of
+    // querying the stage once for every visible card.
+    const existingCovers = Array.from(stage.querySelectorAll('.cover'));
+    const coverByTrackId = new Map(existingCovers.map((cover) => [cover.dataset.trackId, cover]));
     for(let i = 0; i < total; i++){
-      const offset = i - centerIndex;
-      if(Math.abs(offset) > RANGE) continue;
+      const offset = i - centerIndex + browseProgress;
+      if(Math.abs(offset) > RANGE + 1) continue;
       const track = tracks[i];
-      const el = document.createElement('div');
-      el.className = 'cover' + (offset === 0 ? ' is-center' : '') + (i === centerIndex && isPlaying ? ' is-playing' : '');
-      el.dataset.index = i;
+      visibleTrackIds.add(String(track.id));
+      let el = coverByTrackId.get(String(track.id));
+      if(!el){
+        el = document.createElement('div');
+        el.className = 'cover';
+        el.dataset.trackId = track.id;
+        el.addEventListener('click', () => onCoverClick(Number(el.dataset.index)));
+        stage.appendChild(el);
+      }
+      const coverClass = 'cover' + (offset === 0 ? ' is-center' : '') + (i === playingIndex && isPlaying ? ' is-playing' : '');
+      if(el.className !== coverClass) el.className = coverClass;
+      if(el.dataset.index !== String(i)) el.dataset.index = i;
 
       let tx, ty, tz, ry, scale, z, opacity;
       const dir = offset === 0 ? 0 : (offset > 0 ? 1 : -1);
       const a = Math.abs(offset);
 
-      if(offset === 0){
-        tx = 0; ty = -6; tz = 60; ry = 0; scale = 1; z = 100; opacity = 1;
-      } else {
-        tx = dir * (215 + (a-1) * 108);
-        ty = 0;
-        tz = -150 - (a-1) * 28;
-        ry = dir * -58;
-        scale = 0.72 - Math.min(a-1, 4) * 0.03;
-        z = 100 - a;
-        opacity = a > 5 ? 0 : (1 - (a-1) * 0.14);
-      }
+      // One continuous curve lets the whole album wall follow the drag.
+      // At one card-width it lands exactly in the first side slot, then the
+      // following covers recede at a steady Cover Flow rhythm.
+      const firstStep = Math.min(a, 1);
+      const depth = Math.max(0, a - 1);
+      tx = dir * (228 * firstStep + 104 * depth);
+      ty = -12 + 17 * firstStep + Math.min(depth, 4) * 5;
+      tz = 86 - 212 * firstStep - depth * 46;
+      ry = dir * -(64 * firstStep + Math.min(depth, 4) * 3);
+      scale = Math.max(.5, 1 - .23 * firstStep - Math.min(depth, 5) * .045);
+      z = Math.round(1000 - a * 20);
+      opacity = Math.max(.12, 1 - .1 * firstStep - depth * .12);
 
       el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,' + tz + 'px) rotateY(' + ry + 'deg) scale(' + scale + ')';
       el.style.zIndex = z;
       el.style.opacity = opacity;
-      el.innerHTML = '<div class="cover-face">' + coverFaceHTML(track) + '</div>';
-      el.addEventListener('click', () => onCoverClick(i));
-      stage.appendChild(el);
+      const imageSource = track.art || '';
+      if(el.dataset.coverArt !== imageSource){
+        el.dataset.coverArt = imageSource;
+        el.innerHTML = '<div class="cover-face">' + coverFaceHTML(track) + '</div>';
+      }
     }
+    existingCovers.forEach((cover) => {
+      if(!visibleTrackIds.has(cover.dataset.trackId)) cover.remove();
+    });
   }
 
-  function onCoverClick(i){
-    if(i === centerIndex){
+  function onCoverClick(i, force = false){
+    if(!force && performance.now() < suppressCoverClickUntil) return;
+    const isSettledOnCenter = i === centerIndex && !coverRollFrame && Math.abs(coverBrowseProgress) < .01;
+    if(!isSettledOnCenter){
+      retargetCoverRoll(centerIndex - i, isPlaying);
+      return;
+    }
+    if(centerIndex === playingIndex){
       togglePlay();
     } else {
-      playCardSound();
-      centerIndex = i;
-      renderCovers();
+      // Browsing never replaces the current song. A deliberate click on the
+      // settled cover is the explicit moment that commits a track change.
+      playingIndex = centerIndex;
       updateNowInfo();
-      loadCurrent(isPlaying);
+      loadCurrent(true);
       highlightActiveTrack();
     }
   }
 
   function updateNowInfo(){
-    const t = tracks[centerIndex];
+    const t = tracks[playingIndex];
     if(!t) return;
     nowTitle.textContent = t.title || 'Untitled';
     nowArtist.textContent = t.artist || 'Unknown artist';
     nowAlbum.textContent = t.album || '';
     document.title = (t.title ? t.title + ' — ' : '') + '🎧';
-    setAmbient(t.art);
+    updateBrowseAmbient();
     barTitle.textContent = t.title || 'Untitled';
     barSub.textContent = [t.artist, t.album].filter(Boolean).join(' — ') || 'Unknown artist';
     barThumb.innerHTML = t.art ? '<img src="' + t.art + '">' : NOTE_SVG;
   }
 
   function loadCurrent(autoplay){
-    const t = tracks[centerIndex];
+    const t = tracks[playingIndex];
     if(!t) return;
     audio.src = t.url;
     audio.currentTime = 0;
@@ -1053,7 +1565,12 @@
   function togglePlay(){
     if(tracks.length === 0) return;
     if(audio.paused){
-      audio.play().then(()=>{ isPlaying = true; updatePlayUI(); }).catch(()=>{});
+      isPlaying = true;
+      updatePlayUI();
+      audio.play().catch(()=>{
+        isPlaying = false;
+        updatePlayUI();
+      });
     } else {
       audio.pause();
       isPlaying = false;
@@ -1069,22 +1586,196 @@
 
   function goNext(auto){
     if(tracks.length === 0) return;
-    playCardSound();
-    centerIndex = (centerIndex + 1) % tracks.length;
-    renderCovers();
-    updateNowInfo();
-    loadCurrent(auto === false ? isPlaying : true);
-    highlightActiveTrack();
+    let nextIndex;
+    if(shuffleOn && tracks.length > 1){
+      playHistory.push(playingIndex);
+      do { nextIndex = Math.floor(Math.random() * tracks.length); } while(nextIndex === playingIndex);
+    } else {
+      nextIndex = (playingIndex + 1) % tracks.length;
+    }
+    startCoverRollTo(nextIndex, auto === false ? isPlaying : true);
   }
 
   function goPrev(){
     if(tracks.length === 0) return;
-    playCardSound();
-    centerIndex = (centerIndex - 1 + tracks.length) % tracks.length;
+    let previousIndex;
+    if(shuffleOn && playHistory.length > 0){
+      previousIndex = playHistory.pop();
+    } else {
+      previousIndex = (playingIndex - 1 + tracks.length) % tracks.length;
+    }
+    startCoverRollTo(previousIndex, isPlaying);
+  }
+
+  function clampBrowseProgress(value){
+    const beforeFirst = centerIndex;
+    const afterLast = tracks.length - 1 - centerIndex;
+    return Math.max(-afterLast, Math.min(beforeFirst, value));
+  }
+
+  function playTicksCrossed(previous, next){
+    let from = Math.round(previous);
+    const to = Math.round(next);
+    if(from === to) return;
+    const direction = to > from ? 1 : -1;
+    while(from !== to){
+      from += direction;
+      playCardSound();
+    }
+  }
+
+  function setBrowseProgress(value, withTicks = true){
+    const next = clampBrowseProgress(value);
+    if(withTicks) playTicksCrossed(coverBrowseProgress, next);
+    coverBrowseProgress = next;
+    renderCovers(coverBrowseProgress);
+    updateBrowseAmbient();
+  }
+
+  function stopCoverRoll(){
+    coverMotionGeneration += 1;
+    if(coverRollFrame) cancelAnimationFrame(coverRollFrame);
+    coverRollFrame = null;
+    coverRollMode = null;
+    coverRollTarget = null;
+    coverRollCommitPlayback = false;
+    coverRollVelocity = 0;
+    coverRollLastTime = 0;
+  }
+
+  function commitCoverRoll(target, autoplay, commitPlayback = false){
+    const cardSteps = Math.round(target);
+    if(cardSteps !== 0) centerIndex -= cardSteps;
+    coverBrowseProgress = 0;
     renderCovers();
-    updateNowInfo();
-    loadCurrent(isPlaying);
+    if(commitPlayback){
+      if(playingIndex !== centerIndex){
+        playingIndex = centerIndex;
+        updateNowInfo();
+        loadCurrent(autoplay);
+      } else if(autoplay && !isPlaying){
+        togglePlay();
+      }
+    }
     highlightActiveTrack();
+  }
+
+  // This path is used only by album clicks. A subsequent click changes the
+  // destination without restarting the current animation.
+  function retargetCoverRoll(target, autoplay, commitPlayback = false){
+    target = clampBrowseProgress(Math.round(target));
+    if(Math.abs(target - coverBrowseProgress) < .01){
+      if(coverRollMode === 'dynamic') stopCoverRoll();
+      commitCoverRoll(target, autoplay, commitPlayback);
+      stageWrap.classList.remove('is-browsing');
+      return;
+    }
+
+    if(coverRollFrame && coverRollMode !== 'dynamic') stopCoverRoll();
+    coverRollTarget = target;
+    coverRollAutoplay = autoplay;
+    coverRollCommitPlayback = commitPlayback;
+    if(coverRollFrame) return;
+
+    coverRollMode = 'dynamic';
+    stageWrap.classList.add('is-browsing');
+    coverRollLastTime = performance.now();
+    const motionGeneration = coverMotionGeneration;
+    const frame = (now) => {
+      if(motionGeneration !== coverMotionGeneration || coverRollMode !== 'dynamic' || coverRollTarget === null){
+        coverRollFrame = null;
+        return;
+      }
+
+      const frameScale = Math.max(.5, Math.min(2.5, (now - coverRollLastTime) / 16.667));
+      coverRollLastTime = now;
+      const remaining = coverRollTarget - coverBrowseProgress;
+      if(Math.abs(remaining) < .006 && Math.abs(coverRollVelocity) < .006){
+        const finalTarget = coverRollTarget;
+        const finalAutoplay = coverRollAutoplay;
+        const finalCommitPlayback = coverRollCommitPlayback;
+        coverRollFrame = null;
+        coverRollMode = null;
+        coverRollTarget = null;
+        coverRollCommitPlayback = false;
+        coverRollVelocity = 0;
+        coverRollLastTime = 0;
+        commitCoverRoll(finalTarget, finalAutoplay, finalCommitPlayback);
+        stageWrap.classList.remove('is-browsing');
+        return;
+      }
+
+      coverRollVelocity = (coverRollVelocity + remaining * .19 * frameScale) * Math.pow(.65, frameScale);
+      // Keep nearby selections tactile, while long list jumps move through the
+      // shelf faster and then slow back down for the final cards.
+      const speedLimit = .52 + Math.min(.78, Math.max(0, Math.abs(remaining) - 6) * .026);
+      coverRollVelocity = Math.max(-speedLimit, Math.min(speedLimit, coverRollVelocity));
+      let next = coverBrowseProgress + coverRollVelocity * frameScale;
+      if((coverRollTarget - coverBrowseProgress) * (coverRollTarget - next) <= 0){
+        next = coverRollTarget;
+        coverRollVelocity = 0;
+      }
+      setBrowseProgress(next);
+      coverRollFrame = requestAnimationFrame(frame);
+    };
+    coverRollFrame = requestAnimationFrame(frame);
+  }
+
+  function rollToProgress(target, autoplay, fast, commitPlayback = false){
+    target = clampBrowseProgress(Math.round(target));
+    const start = coverBrowseProgress;
+    const distance = Math.abs(target - start);
+    if(distance < 0.01){
+      commitCoverRoll(target, autoplay, commitPlayback);
+      stageWrap.classList.remove('is-browsing');
+      return;
+    }
+    stopCoverRoll();
+    coverRollMode = 'timed';
+    stageWrap.classList.add('is-browsing');
+    const duration = Math.max(150, Math.min(620, (fast ? 130 : 190) + distance * (fast ? 64 : 95)));
+    const startedAt = performance.now();
+    const motionGeneration = coverMotionGeneration;
+    const frame = (now) => {
+      if(motionGeneration !== coverMotionGeneration) return;
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      setBrowseProgress(start + (target - start) * eased);
+      if(progress < 1){
+        coverRollFrame = requestAnimationFrame(frame);
+      } else {
+        coverRollFrame = null;
+        coverRollMode = null;
+        commitCoverRoll(target, autoplay, commitPlayback);
+        stageWrap.classList.remove('is-browsing');
+      }
+    };
+    coverRollFrame = requestAnimationFrame(frame);
+  }
+
+  function startCoverRollTo(targetIndex, autoplay, fast = false){
+    if(targetIndex === centerIndex && Math.abs(coverBrowseProgress) < 0.01){
+      if(playingIndex !== targetIndex){
+        playingIndex = targetIndex;
+        updateNowInfo();
+        loadCurrent(autoplay);
+        highlightActiveTrack();
+      }
+      return;
+    }
+    const target = centerIndex - targetIndex;
+    if(Math.abs(target) > 8){
+      playCardSound();
+      centerIndex = targetIndex;
+      playingIndex = targetIndex;
+      coverBrowseProgress = 0;
+      renderCovers();
+      updateNowInfo();
+      loadCurrent(autoplay);
+      highlightActiveTrack();
+      return;
+    }
+    rollToProgress(target, autoplay, fast, true);
   }
 
   audio.addEventListener('timeupdate', () => {
@@ -1096,10 +1787,22 @@
   });
   audio.addEventListener('loadedmetadata', () => {
     timeDur.textContent = fmtTime(audio.duration);
-    if(tracks[centerIndex]) tracks[centerIndex].duration = audio.duration;
+    if(tracks[playingIndex]) tracks[playingIndex].duration = audio.duration;
     renderTrackList();
   });
-  audio.addEventListener('ended', () => goNext(true));
+  audio.addEventListener('ended', () => {
+    if(repeatMode === 'one'){
+      audio.currentTime = 0;
+      audio.play().then(()=>{ isPlaying = true; updatePlayUI(); }).catch(()=>{});
+      return;
+    }
+    if(repeatMode === 'off' && !shuffleOn && playingIndex === tracks.length - 1){
+      isPlaying = false;
+      updatePlayUI();
+      return;
+    }
+    goNext(true);
+  });
 
   seek.addEventListener('input', () => {
     if(!audio.duration) return;
@@ -1125,120 +1828,617 @@
   nextBtn.addEventListener('click', () => goNext(isPlaying));
   prevBtn.addEventListener('click', goPrev);
 
+  playModeBtn.addEventListener('click', () => {
+    if(!shuffleOn && repeatMode === 'all'){
+      repeatMode = 'one';
+    } else if(!shuffleOn && repeatMode === 'one'){
+      repeatMode = 'off';
+      shuffleOn = true;
+    } else if(shuffleOn){
+      shuffleOn = false;
+      repeatMode = 'off';
+      playHistory = [];
+    } else {
+      shuffleOn = false;
+      repeatMode = 'all';
+      playHistory = [];
+    }
+    updateModeButtons();
+  });
+
+  function isAudioFileDrag(event){
+    return event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('Files');
+  }
   ['dragenter','dragover'].forEach(evt => {
     window.addEventListener(evt, (e) => {
+      if(dragItem) return;
+      if(!isAudioFileDrag(e)) return;
       e.preventDefault();
       dragHint.classList.add('active');
     });
   });
   ['dragleave','drop'].forEach(evt => {
     window.addEventListener(evt, (e) => {
+      if(dragItem) return;
+      if(!isAudioFileDrag(e)) return;
       e.preventDefault();
       if(evt === 'drop'){
         dragHint.classList.remove('active');
-        if(e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+        if(e.dataTransfer.files) addFiles(e.dataTransfer.files);
       } else if(e.target === document.body || e.relatedTarget === null){
         dragHint.classList.remove('active');
       }
     });
   });
 
-  // Drag / swipe / wheel on stage to browse — velocity-aware, page-flip style
+  // One interaction model for mouse drag, touch swipe, and wheel scrolling.
+  const CARD_TRAVEL = 228;
   let dragStartX = null;
+  let dragCover = null;
+  let dragStartProgress = 0;
   let dragMoved = 0;
+  let dragHasControl = false;
   let lastMoveX = 0;
   let lastMoveTime = 0;
   let dragVelocity = 0;
+  let suppressCoverClickUntil = 0;
+  let coverBrowseProgress = 0;
+  let coverRollFrame = null;
+  let coverRollMode = null;
+  let coverRollTarget = null;
+  let coverRollCommitPlayback = false;
+  let coverRollVelocity = 0;
+  let coverRollLastTime = 0;
+  let coverRollAutoplay = false;
+  let coverMotionGeneration = 0;
+  let wheelSettleTimer = null;
+  let wheelVelocity = 0;
+  let wheelLastTime = 0;
+  let coverInputBlockedUntil = 0;
 
+  function freezeCoverMotion(){
+    clearTimeout(wheelSettleTimer);
+    wheelSettleTimer = null;
+    wheelVelocity = 0;
+    wheelLastTime = 0;
+    stopCoverRoll();
+
+    // Lock on a settled card so releasing an in-progress gesture cannot start
+    // a fresh momentum animation behind the privacy screen.
+    if(Math.abs(coverBrowseProgress) > .01){
+      commitCoverRoll(Math.round(coverBrowseProgress), false, false);
+      updateBrowseAmbient();
+    } else {
+      renderCovers();
+    }
+    dragStartX = null;
+    dragCover = null;
+    dragMoved = 0;
+    dragVelocity = 0;
+    dragHasControl = false;
+    stageWrap.classList.remove('is-browsing');
+  }
+
+  function findCoverAtPoint(x, y){
+    const directHits = document.elementsFromPoint(x, y)
+      .map((node) => node.closest ? node.closest('.cover') : null)
+      .filter((cover, index, all) => cover && stage.contains(cover) && all.indexOf(cover) === index);
+    if(directHits.length) return directHits[0];
+
+    return Array.from(stage.querySelectorAll('.cover'))
+      .filter((cover) => {
+        const rect = cover.getBoundingClientRect();
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+      })
+      .sort((a, b) => Number(b.style.zIndex || 0) - Number(a.style.zIndex || 0))[0] || null;
+  }
+
+  stageWrap.addEventListener('dragstart', (e) => e.preventDefault());
   stageWrap.addEventListener('pointerdown', (e) => {
-    if(tracks.length === 0) return;
+    if(pageLocked || tracks.length === 0 || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    clearTimeout(wheelSettleTimer);
+    dragCover = findCoverAtPoint(e.clientX, e.clientY);
     dragStartX = e.clientX;
+    dragStartProgress = coverBrowseProgress;
     lastMoveX = e.clientX;
     dragMoved = 0;
     dragVelocity = 0;
+    dragHasControl = false;
     lastMoveTime = performance.now();
-    stage.style.transition = 'none';
     stageWrap.setPointerCapture(e.pointerId);
   });
   stageWrap.addEventListener('pointermove', (e) => {
     if(dragStartX === null) return;
     dragMoved = e.clientX - dragStartX;
     const now = performance.now();
+
+    if(!dragHasControl){
+      if(Math.abs(dragMoved) <= 6) return;
+      dragHasControl = true;
+      stopCoverRoll();
+      dragStartProgress = coverBrowseProgress - dragMoved / CARD_TRAVEL;
+      lastMoveX = e.clientX;
+      lastMoveTime = now;
+      dragVelocity = 0;
+      stageWrap.classList.add('is-browsing');
+    }
+
     const dt = now - lastMoveTime;
     if(dt > 0){
       dragVelocity = (e.clientX - lastMoveX) / dt;
       lastMoveX = e.clientX;
       lastMoveTime = now;
     }
-    const clamped = Math.max(-180, Math.min(180, dragMoved));
-    stage.style.transform = 'translateX(' + (clamped * 0.55) + 'px) rotateY(' + (clamped * -0.06) + 'deg)';
+    setBrowseProgress(dragStartProgress + dragMoved / CARD_TRAVEL);
   });
-  stageWrap.addEventListener('pointerup', () => {
+  stageWrap.addEventListener('pointerup', (e) => {
     if(dragStartX === null) return;
-    stage.style.transition = 'transform .32s cubic-bezier(.2,.9,.32,1.18)';
-    stage.style.transform = 'translateX(0) rotateY(0)';
-
-    const distance = 44;
-    const flickVelocity = 0.5;
-    if(dragMoved < -distance || dragVelocity < -flickVelocity){ goNext(isPlaying); }
-    else if(dragMoved > distance || dragVelocity > flickVelocity){ goPrev(); }
-
+    const wasDragged = dragHasControl;
+    const clickedCover = dragCover || findCoverAtPoint(e.clientX, e.clientY);
+    if(!wasDragged && clickedCover){
+      suppressCoverClickUntil = performance.now() + 280;
+      onCoverClick(Number(clickedCover.dataset.index), true);
+    } else if(wasDragged) {
+      const momentumCards = (dragVelocity * 380) / CARD_TRAVEL;
+      const target = clampBrowseProgress(Math.round(coverBrowseProgress + momentumCards));
+      suppressCoverClickUntil = performance.now() + 280;
+      rollToProgress(target, isPlaying, Math.abs(dragVelocity) > 0.8);
+    }
     dragStartX = null;
+    dragCover = null;
     dragMoved = 0;
     dragVelocity = 0;
+    dragHasControl = false;
   });
   stageWrap.addEventListener('pointercancel', () => {
-    stage.style.transition = 'transform .32s cubic-bezier(.2,.9,.32,1.18)';
-    stage.style.transform = 'translateX(0) rotateY(0)';
+    if(dragStartX === null) return;
+    if(dragHasControl) rollToProgress(0, isPlaying, false);
     dragStartX = null;
+    dragCover = null;
     dragMoved = 0;
     dragVelocity = 0;
+    dragHasControl = false;
   });
 
-  let wheelLock = false;
   stageWrap.addEventListener('wheel', (e) => {
+    if(pageLocked || performance.now() < coverInputBlockedUntil){
+      e.preventDefault();
+      return;
+    }
     if(tracks.length === 0) return;
     e.preventDefault();
-    if(wheelLock) return;
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if(Math.abs(delta) < 10) return;
-    wheelLock = true;
-    if(delta > 0) goNext(isPlaying); else goPrev();
-    setTimeout(() => wheelLock = false, 140);
+    if(Math.abs(delta) < 1) return;
+    stopCoverRoll();
+    stageWrap.classList.add('is-browsing');
+    const now = performance.now();
+    const elapsed = Math.max(8, now - (wheelLastTime || now - 16));
+    const cardDelta = -delta / CARD_TRAVEL;
+    wheelVelocity = wheelVelocity * 0.42 + cardDelta / elapsed;
+    wheelLastTime = now;
+    setBrowseProgress(coverBrowseProgress + cardDelta);
+    clearTimeout(wheelSettleTimer);
+    const wheelGeneration = coverMotionGeneration;
+    wheelSettleTimer = window.setTimeout(() => {
+      if(pageLocked || wheelGeneration !== coverMotionGeneration) return;
+      const momentumCards = Math.max(-3.5, Math.min(3.5, wheelVelocity * 260));
+      const target = clampBrowseProgress(Math.round(coverBrowseProgress + momentumCards));
+      wheelVelocity = 0;
+      wheelLastTime = 0;
+      rollToProgress(target, isPlaying, true);
+    }, 72);
   }, { passive:false });
 
   window.addEventListener('keydown', (e) => {
+    if(e.code === 'Escape'){
+      e.preventDefault();
+      togglePageLock();
+      return;
+    }
+    if(pageLocked){
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     if(e.target.tagName === 'INPUT') return;
     if(e.code === 'ArrowRight'){ goNext(isPlaying); }
     else if(e.code === 'ArrowLeft'){ goPrev(); }
     else if(e.code === 'Space'){ e.preventDefault(); togglePlay(); }
   });
 
+  const REMOVE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+  function animateListShift(before){
+    trackList.querySelectorAll('.track-item').forEach((el) => {
+      const from = before.get(el);
+      if(!from || el === dragItem) return;
+      const delta = from.top - el.getBoundingClientRect().top;
+      if(!delta) return;
+      el.style.transition = 'none';
+      el.style.transform = `translateY(${delta}px)`;
+      requestAnimationFrame(() => {
+        el.style.transition = '';
+        el.style.transform = '';
+      });
+    });
+  }
+
+  function moveDraggedItem(target, before){
+    if(!dragItem || target === dragItem) return false;
+    const reference = before ? target : target.nextElementSibling;
+    if(reference === dragItem || (!before && dragItem.nextElementSibling === target)) return false;
+    const positions = new Map();
+    trackList.querySelectorAll('.track-item').forEach((el) => positions.set(el, el.getBoundingClientRect()));
+    trackList.insertBefore(dragItem, reference);
+    animateListShift(positions);
+    return true;
+  }
+
+  function syncDraggedOrder(){
+    if(!dragItem || !dragTrack) return;
+    const browseTrackRef = tracks[centerIndex];
+    const playingTrackRef = tracks[playingIndex];
+    const tracksById = new Map(tracks.map((track) => [String(track.id), track]));
+    const orderedTracks = Array.from(trackList.querySelectorAll('.track-item'))
+      .map((el) => tracksById.get(el.dataset.trackId))
+      .filter(Boolean);
+    if(orderedTracks.length !== tracks.length) return;
+    tracks.splice(0, tracks.length, ...orderedTracks);
+    centerIndex = tracks.indexOf(browseTrackRef);
+    playingIndex = tracks.indexOf(playingTrackRef);
+    playHistory = [];
+    syncRenderedTrackIndices();
+    highlightActiveTrack();
+    queueCoverOrderSync();
+  }
+
+  let scrollbarFadeTimer = null;
+  function syncTrackScrollbar(keepVisible = false){
+    const hasOverflow = trackList.scrollHeight > trackList.clientHeight + 1;
+
+    if(!hasOverflow){
+      trackList.classList.remove('is-scrolling');
+      return;
+    }
+
+    if(keepVisible){
+      trackList.classList.add('is-scrolling');
+      clearTimeout(scrollbarFadeTimer);
+      scrollbarFadeTimer = setTimeout(() => {
+        trackList.classList.remove('is-scrolling');
+      }, 1200);
+    }
+  }
+
+  trackList.addEventListener('scroll', () => syncTrackScrollbar(true), { passive:true });
+
+  let dissolveCanvas;
+  let dissolveContext;
+  let dissolveFrame;
+
+  function getDissolveContext(){
+    if(!dissolveCanvas){
+      dissolveCanvas = document.createElement('canvas');
+      dissolveCanvas.className = 'dissolve-canvas';
+      document.body.appendChild(dissolveCanvas);
+      dissolveContext = dissolveCanvas.getContext('2d');
+    }
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    if(dissolveCanvas.width !== Math.round(width * pixelRatio) || dissolveCanvas.height !== Math.round(height * pixelRatio)){
+      dissolveCanvas.width = Math.round(width * pixelRatio);
+      dissolveCanvas.height = Math.round(height * pixelRatio);
+      dissolveCanvas.style.width = width + 'px';
+      dissolveCanvas.style.height = height + 'px';
+      dissolveContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    }
+    return dissolveContext;
+  }
+
+  function playSongDissolve(item){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(dissolveFrame) cancelAnimationFrame(dissolveFrame);
+    const context = getDissolveContext();
+    const rect = item.getBoundingClientRect();
+    const glassTints = [
+      { fill: 'rgba(255,255,255,.52)', edge: 'rgba(255,255,255,.86)' },
+      { fill: 'rgba(255,236,222,.42)', edge: 'rgba(255,255,255,.68)' },
+      { fill: 'rgba(211,181,166,.38)', edge: 'rgba(255,238,228,.58)' },
+      { fill: 'rgba(126,100,92,.32)', edge: 'rgba(231,207,194,.5)' }
+    ];
+    const particles = Array.from({ length: 46 }, (_, index) => {
+      const spread = Math.pow(Math.random(), .72);
+      const vertices = 3 + Math.floor(Math.random() * 2);
+      const points = Array.from({ length: vertices }, (_, pointIndex) => {
+        const angle = (Math.PI * 2 * pointIndex / vertices) + (Math.random() - .5) * .52;
+        const radius = .55 + Math.random() * .65;
+        return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius };
+      });
+      return {
+        x: rect.left + rect.width * spread,
+        y: rect.top + 10 + Math.random() * Math.max(1, rect.height - 20),
+        dx: 28 + Math.random() * 122,
+        dy: -54 + Math.random() * 108,
+        size: 2.3 + Math.random() * 5.8,
+        delay: (1 - spread) * .22 + Math.random() * .08,
+        rotation: (-1.6 + Math.random() * 3.2),
+        spin: (-7 + Math.random() * 14),
+        tint: glassTints[index % glassTints.length],
+        points
+      };
+    });
+    const startedAt = performance.now();
+    const duration = 820;
+
+    const draw = (now) => {
+      const elapsed = (now - startedAt) / duration;
+      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      particles.forEach((particle) => {
+        const progress = Math.max(0, Math.min(1, (elapsed - particle.delay) / (1 - particle.delay)));
+        if(progress <= 0 || progress >= 1) return;
+        const drift = 1 - Math.pow(1 - progress, 3);
+        const size = particle.size * (1 - progress * .56);
+        const alpha = (1 - progress) * (.48 + progress * .28);
+        const x = particle.x + particle.dx * drift;
+        const y = particle.y + particle.dy * drift + progress * progress * 14;
+        context.save();
+        context.translate(x, y);
+        context.rotate(particle.rotation + particle.spin * drift);
+        context.globalAlpha = alpha;
+        context.fillStyle = particle.tint.fill;
+        context.beginPath();
+        particle.points.forEach((point, pointIndex) => {
+          const px = point.x * size;
+          const py = point.y * size;
+          if(pointIndex === 0) context.moveTo(px, py);
+          else context.lineTo(px, py);
+        });
+        context.closePath();
+        context.fill();
+        context.globalAlpha = alpha * .9;
+        context.strokeStyle = particle.tint.edge;
+        context.lineWidth = .55;
+        context.stroke();
+        context.globalAlpha = alpha * .38;
+        context.beginPath();
+        context.moveTo(particle.points[0].x * size * .5, particle.points[0].y * size * .5);
+        context.lineTo(particle.points[1].x * size * .8, particle.points[1].y * size * .8);
+        context.strokeStyle = '#ffffff';
+        context.stroke();
+        context.restore();
+      });
+      context.globalAlpha = 1;
+      if(elapsed < 1.08) dissolveFrame = requestAnimationFrame(draw);
+      else {
+        context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        dissolveFrame = null;
+      }
+    };
+    dissolveFrame = requestAnimationFrame(draw);
+  }
+
+  function captureTrackPositions(){
+    const listRect = trackList.getBoundingClientRect();
+    const positions = new Map();
+    trackList.querySelectorAll('.track-item').forEach((item) => {
+      const rect = item.getBoundingClientRect();
+      if(rect.bottom >= listRect.top - 12 && rect.top <= listRect.bottom + 12){
+        positions.set(item.dataset.trackId, rect);
+      }
+    });
+    return positions;
+  }
+
+  function animateDeleteReflow(before){
+    requestAnimationFrame(() => {
+      const listRect = trackList.getBoundingClientRect();
+      const shifts = [];
+      trackList.querySelectorAll('.track-item').forEach((item) => {
+        const from = before.get(item.dataset.trackId);
+        if(!from) return;
+        const to = item.getBoundingClientRect();
+        const delta = from.top - to.top;
+        if(delta <= 0.5 || to.bottom < listRect.top - 12 || to.top > listRect.bottom + 12) return;
+        shifts.push({ item, delta });
+      });
+      shifts.forEach(({ item, delta }) => {
+        item.style.transition = 'none';
+        item.style.willChange = 'transform';
+        item.style.transform = `translateY(${delta}px)`;
+      });
+      requestAnimationFrame(() => {
+        shifts.forEach(({ item }) => {
+          item.style.transition = 'transform .48s cubic-bezier(.16,1,.3,1)';
+          item.style.transform = '';
+          item.addEventListener('transitionend', () => {
+            item.style.transition = '';
+            item.style.willChange = '';
+          }, { once:true });
+        });
+      });
+    });
+  }
+
+  function syncRenderedTrackIndices(){
+    trackCount.textContent = tracks.length + (tracks.length === 1 ? ' song' : ' songs');
+    const trackIndexById = new Map(tracks.map((track, index) => [String(track.id), index]));
+    trackList.querySelectorAll('.track-item').forEach((item) => {
+      const index = trackIndexById.get(item.dataset.trackId);
+      if(index >= 0) item.dataset.index = index;
+    });
+  }
+
   // Track list drawer
   function renderTrackList(){
     trackCount.textContent = tracks.length + (tracks.length === 1 ? ' song' : ' songs');
     trackList.innerHTML = '';
+    const q = searchQuery.trim().toLowerCase();
+    trackSearchClear.classList.toggle('show', q.length > 0);
+
+    let shown = 0;
     tracks.forEach((t, i) => {
+      if(q && !((t.title||'').toLowerCase().includes(q) || (t.artist||'').toLowerCase().includes(q))) return;
+      shown++;
       const item = document.createElement('div');
-      item.className = 'track-item' + (i === centerIndex ? ' active' : '');
+      item.className = 'track-item' + (i === playingIndex ? ' active' : '') + (i === playingIndex && isPlaying ? ' playing' : '');
+      item.dataset.index = i;
+      item.dataset.trackId = t.id;
+      const canDrag = !q; // reordering only makes sense against the real, unfiltered order
+      item.draggable = canDrag;
       item.innerHTML =
-        '<span class="track-num">' + (i+1) + '</span>' +
-        '<div class="track-thumb">' + (t.art ? '<img src="'+t.art+'">' : NOTE_SVG) + '</div>' +
+        '<div class="track-thumb">' + (t.art ? '<img draggable="false" src="'+t.art+'">' : NOTE_SVG) + '<span class="track-current-control" aria-hidden="true"><svg class="track-current-play" viewBox="0 0 24 24">' + ICON_PLAY + '</svg><svg class="track-current-pause" viewBox="0 0 24 24">' + ICON_PAUSE + '</svg></span></div>' +
         '<div class="track-info"><div class="t-title">' + escapeHtml(t.title || 'Untitled') + '</div>' +
-        '<div class="t-artist">' + escapeHtml(t.artist || 'Unknown artist') + '</div></div>';
-      item.addEventListener('click', () => {
-        centerIndex = i;
-        renderCovers();
-        updateNowInfo();
-        loadCurrent(true);
-        highlightActiveTrack();
+        '<div class="t-artist">' + escapeHtml(t.artist || 'Unknown artist') + '</div></div>' +
+        '<button class="track-delete" aria-label="Remove from shelf">' + REMOVE_SVG + '</button>';
+
+      item.addEventListener('click', (e) => {
+        if(e.target.closest('.track-delete')) return;
+        const trackIndex = tracks.indexOf(t);
+        if(trackIndex < 0) return;
+        const isCurrentSettled = trackIndex === playingIndex && trackIndex === centerIndex && !coverRollFrame;
+        if(isCurrentSettled){
+          togglePlay();
+          return;
+        }
+        retargetCoverRoll(centerIndex - trackIndex, true, true);
       });
+
+      item.querySelector('.track-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if(deletePending) return;
+        deletePending = true;
+        playSongDissolve(item);
+        item.classList.add('dissolving');
+        setTimeout(() => {
+          const trackIndex = tracks.indexOf(t);
+          if(trackIndex >= 0) deleteTrack(trackIndex, item);
+          deletePending = false;
+        }, 430);
+      });
+
+      if(canDrag){
+        item.addEventListener('dragstart', (e) => {
+          dragSrcIndex = tracks.indexOf(t);
+          dragTrack = t;
+          dragItem = item;
+          dragHasMoved = false;
+          dragHint.classList.remove('active');
+          trackList.classList.add('is-dragging');
+          requestAnimationFrame(() => item.classList.add('dragging'));
+          e.dataTransfer.effectAllowed = 'move';
+          try{ e.dataTransfer.setData('text/plain', String(i)); }catch(err){}
+        });
+        item.addEventListener('dragend', () => {
+          if(dragHasMoved) renderCovers();
+          item.classList.remove('dragging');
+          dragHint.classList.remove('active');
+          trackList.classList.remove('is-dragging');
+          dragSrcIndex = null;
+          dragTrack = null;
+          dragItem = null;
+          dragHasMoved = false;
+        });
+        item.addEventListener('dragover', (e) => {
+          if(dragSrcIndex === null || dragItem === item) return;
+          e.preventDefault();
+          const rect = item.getBoundingClientRect();
+          const before = (e.clientY - rect.top) < rect.height / 2;
+          if(moveDraggedItem(item, before)){
+            syncDraggedOrder();
+            dragSrcIndex = tracks.indexOf(dragTrack);
+            dragHasMoved = true;
+          }
+        });
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+        });
+      }
+
       trackList.appendChild(item);
     });
+
+    if(tracks.length > 0 && shown === 0){
+      const msg = document.createElement('div');
+      msg.className = 'track-empty-msg';
+      msg.textContent = 'No songs match "' + searchQuery.trim() + '"';
+      trackList.appendChild(msg);
+    }
+    requestAnimationFrame(() => syncTrackScrollbar());
   }
+
+  function deleteTrack(i, deletedItem = null){
+    const previousPositions = captureTrackPositions();
+    const removed = tracks[i];
+    const wasPlaying = (i === playingIndex);
+    tracks.splice(i, 1);
+    try{ if(removed.url) URL.revokeObjectURL(removed.url); }catch(e){}
+    try{ if(removed.art) URL.revokeObjectURL(removed.art); }catch(e){}
+    playHistory = [];
+
+    if(tracks.length === 0){
+      audio.pause();
+      audio.removeAttribute('src');
+      isPlaying = false;
+      centerIndex = 0;
+      playingIndex = 0;
+      stage.innerHTML = '';
+      floorGlow.style.opacity = 0;
+      emptyState.style.display = 'flex';
+      nowInfo.style.visibility = 'hidden';
+      barTitle.textContent = 'Good time, the office worker';
+      barSub.textContent = 'Add music to get started';
+      barThumb.innerHTML = '';
+      seek.value = 0;
+      seek.style.setProperty('--fill', '0%');
+      timeCur.textContent = '0:00';
+      timeDur.textContent = '0:00';
+      updatePlayUI();
+      renderTrackList();
+      return;
+    }
+
+    if(i < centerIndex) centerIndex -= 1;
+    else if(i === centerIndex) centerIndex = Math.min(centerIndex, tracks.length - 1);
+    if(i < playingIndex) playingIndex -= 1;
+    else if(i === playingIndex) playingIndex = Math.min(playingIndex, tracks.length - 1);
+
+    if(deletedItem && deletedItem.isConnected){
+      deletedItem.remove();
+      if(searchQuery.trim() && !trackList.querySelector('.track-item')){
+        renderTrackList();
+        renderCovers();
+        updateNowInfo();
+        highlightActiveTrack();
+        if(wasPlaying) loadCurrent(isPlaying);
+        return;
+      }
+      syncRenderedTrackIndices();
+      highlightActiveTrack();
+      animateDeleteReflow(previousPositions);
+      requestAnimationFrame(() => {
+        syncTrackScrollbar();
+      });
+      setTimeout(() => {
+        renderCovers();
+        updateNowInfo();
+        if(wasPlaying) loadCurrent(isPlaying);
+      }, 150);
+      return;
+    }
+
+    renderCovers();
+    updateNowInfo();
+    renderTrackList();
+    highlightActiveTrack();
+    if(wasPlaying) loadCurrent(isPlaying);
+  }
+
   function highlightActiveTrack(){
-    document.querySelectorAll('.track-item').forEach((el, i) => {
-      el.classList.toggle('active', i === centerIndex);
+    document.querySelectorAll('.track-item').forEach((el) => {
+      const isCurrent = Number(el.dataset.index) === playingIndex;
+      el.classList.toggle('active', isCurrent);
+      el.classList.toggle('playing', isCurrent && isPlaying);
     });
   }
   function escapeHtml(s){
@@ -1246,6 +2446,17 @@
     d.textContent = s;
     return d.innerHTML;
   }
+
+  trackSearch.addEventListener('input', () => {
+    searchQuery = trackSearch.value;
+    renderTrackList();
+  });
+  trackSearchClear.addEventListener('click', () => {
+    searchQuery = '';
+    trackSearch.value = '';
+    trackSearch.focus();
+    renderTrackList();
+  });
 
   listToggle.addEventListener('click', () => {
     drawer.classList.add('open');
@@ -1258,8 +2469,17 @@
   drawerClose.addEventListener('click', closeDrawer);
   drawerBackdrop.addEventListener('click', closeDrawer);
 
+  // The mini-player cover is a non-destructive shortcut back to the album
+  // currently playing in Cover Flow.
+  barThumb.addEventListener('click', () => {
+    if(!tracks.length || playingIndex < 0) return;
+    retargetCoverRoll(centerIndex - playingIndex, isPlaying);
+  });
+
+  buildRainLock();
   volume.style.setProperty('--vfill', (volume.value*100) + '%');
   updateVolIcon();
+  updateModeButtons();
 
   // Touch devices have no hover — tapping the bar (outside its buttons) toggles the expanded state
   const miniBar = document.getElementById('mini-bar');
